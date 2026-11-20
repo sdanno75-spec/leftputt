@@ -286,7 +286,8 @@ footer{max-width:1440px;margin:0 auto;padding:0 16px 22px;color:#5f8a71;font-siz
     <div class="stage-bar">
       <div class="view-ctl">
         <div class="seg" id="viewSeg">
-          <button type="button" data-view="eye" class="on">アドレス目線</button>
+          <button type="button" data-view="crouch" class="on">しゃがみ読み</button>
+          <button type="button" data-view="eye">アドレス目線</button>
           <button type="button" data-view="address">横から全体</button>
           <button type="button" data-view="behind">ライン後方</button>
           <button type="button" data-view="cup">カップ側</button>
@@ -498,7 +499,7 @@ footer{max-width:1440px;margin:0 auto;padding:0 16px 22px;color:#5f8a71;font-siz
     </div>
   </aside>
 </div>
-<footer id="appVer">パットゲームアプリ v3.6.0</footer>
+<footer id="appVer">パットゲームアプリ v3.7.0</footer>
 <div class="upd" id="updBar" hidden role="status">
   <span id="updText">新しい版があります</span>
   <button type="button" id="updNow">更新する</button>
@@ -761,6 +762,8 @@ function preset(name) {
   eyeCtl.hidden = cam.mode !== 'eye';
   hint.textContent = cam.mode === 'eye' ? '左右ドラッグで顔の向き／ホイール・ピンチでズーム' : 'ドラッグで回転／ホイール・ピンチでズーム';
   if (name === 'address') { camGoal.yaw = hs() * Math.PI / 2; camGoal.pitch = 0.8; camGoal.dist = d; }
+  // しゃがみ読み：ボールの1.5m後ろ、目の高さ45cmからライン全体を見る
+  if (name === 'crouch') { const back = st.D / 2 + 1.5; camGoal.yaw = Math.PI; camGoal.pitch = Math.atan2(0.45, back); camGoal.dist = Math.hypot(back, 0.45); }
   if (name === 'behind') { camGoal.yaw = Math.PI; camGoal.pitch = 0.42; camGoal.dist = st.D * 0.75 + 2; }
   if (name === 'cup') { camGoal.yaw = 0; camGoal.pitch = 0.42; camGoal.dist = st.D * 0.75 + 2; }
   if (name === 'top') { camGoal.yaw = hs() * Math.PI / 2; camGoal.pitch = 1.53; camGoal.dist = d * 0.95; }
@@ -1566,6 +1569,7 @@ function renderR3(now) {
   R.putter.position.set(u.x * anim.off, hgt(0, 0) * EX, u.z * anim.off);
   R.putter.rotation.set(0, Math.atan2(-u.z, u.x), 0);
   R.putter.scale.z = hs();                            // 右打ちはヒールとシャフトが反対側
+  R.putter.visible = !(presetName === 'crouch' && anim.phase !== 'stroke');   // しゃがみ読みではラインの邪魔をしない（打つ瞬間だけ出す）
   // カメラ（2Dの計算と完全に同じ視点）
   const c = R.camera;
   c.fov = 2 * Math.atan((ch / 2) / C3.F) * 180 / Math.PI;
@@ -1965,7 +1969,7 @@ function loadHole(h, keepRead) {
   st.auto = false; st.touchMode = 'flat'; st.compare = false;
   if (!keepRead) { st.aimCups = 0; st.flatX = st.D; }      // 最初は「まっすぐ・実際の距離」から
   recompute();
-  preset(presetName || 'eye');
+  preset(presetName || 'crouch');
   renderGame();
 }
 function nextHole() { game.n++; game.putted = false; game.last = null; game.hole = randomHole(); loadHole(game.hole, false); }
@@ -2200,7 +2204,7 @@ initR3();
    GitHub に置いた version.json の版と、このページの版を比べる。
    新しい版があれば、キャッシュを通らない URL で読み込み直す。
    ゲームやラウンドの途中は勝手に読み込み直さず、お知らせだけ出す。 */
-const APP_VERSION = '3.6.0';
+const APP_VERSION = '3.7.0';
 function verNum(v) { return String(v).split('.').map(n => parseInt(n, 10) || 0).reduce((a, n) => a * 1000 + n, 0); }
 function playing() {
   if (anim.phase !== 'idle' && anim.phase !== 'rest') return true;
@@ -2242,7 +2246,7 @@ document.querySelectorAll('#handSeg button').forEach(b => b.addEventListener('cl
   st.hand = b.dataset.hand;
   try { localStorage.setItem('putt-hand', st.hand); } catch (e) { /* 保存できなくても動く */ }
   applyHand();
-  preset(presetName || 'eye');
+  preset(presetName || 'crouch');
   updateUi();
   if (game.on) renderGame();
 }));
@@ -2275,7 +2279,7 @@ document.querySelectorAll('.btn.step').forEach(b => {
 setCompact();
 resize();
 recompute();
-preset('eye');
+preset('crouch');
 cam.yaw = camGoal.yaw; cam.pitch = camGoal.pitch; cam.dist = camGoal.dist; cam.t.x = camGoal.tx;
 requestAnimationFrame(frame);
 })();
