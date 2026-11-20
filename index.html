@@ -181,6 +181,10 @@ body.compact.gaming .legend{display:none}
 body.compact .chip{font-size:11.5px;padding:4px 8px}
 body.compact .chip.big{font-size:13px}
 .tabs{flex-wrap:wrap;row-gap:4px}
+#topSetBtn{display:none;margin-left:auto;align-self:center}
+body.compact.gaming #topSetBtn{display:inline-block}
+body.compact.gaming .tabs .hand{margin-left:6px}
+body.compact.gaming #gHistBtn{display:none}
 .tabs .hand{margin-left:auto;align-self:center;padding:2px}
 .tabs .hand button{padding:5px 12px;font-size:12.5px;border:0;border-radius:7px;font-weight:700}
 .tabs{max-width:1440px;margin:0 auto;padding:4px 16px 0;display:flex;gap:6px}
@@ -272,6 +276,7 @@ footer{max-width:1440px;margin:0 auto;padding:0 16px 22px;color:#5f8a71;font-siz
   <button type="button" data-tab="sim" class="on">シミュレーター</button>
   <button type="button" data-tab="game">ゲーム（ライン読み練習）</button>
   <button type="button" data-tab="round">ラウンド</button>
+  <button type="button" class="btn mini-btn" id="topSetBtn">成績・設定</button>
   <div class="seg hand" id="handSeg" aria-label="利き手"><button type="button" data-hand="L" class="on">左打ち</button><button type="button" data-hand="R">右打ち</button></div>
 </nav>
 
@@ -500,7 +505,7 @@ footer{max-width:1440px;margin:0 auto;padding:0 16px 22px;color:#5f8a71;font-siz
     </div>
   </aside>
 </div>
-<footer id="appVer">パットゲームアプリ v3.9.0</footer>
+<footer id="appVer">パットゲームアプリ v3.9.1</footer>
 <div class="upd" id="updBar" hidden role="status">
   <span id="updText">新しい版があります</span>
   <button type="button" id="updNow">更新する</button>
@@ -2173,6 +2178,7 @@ $('followBtn').addEventListener('click', () => {
 });
 $('gReset').addEventListener('click', () => { game.hist = []; game.n = 0; nextHole(); });
 $('gHistBtn').addEventListener('click', () => document.body.classList.toggle('histopen'));
+$('topSetBtn').addEventListener('click', () => document.body.classList.toggle('histopen'));
 $('gHistClose').addEventListener('click', () => document.body.classList.remove('histopen'));
 
 function setTab(t) {
@@ -2212,7 +2218,7 @@ initR3();
    GitHub に置いた version.json の版と、このページの版を比べる。
    新しい版があれば、キャッシュを通らない URL で読み込み直す。
    ゲームやラウンドの途中は勝手に読み込み直さず、お知らせだけ出す。 */
-const APP_VERSION = '3.9.0';
+const APP_VERSION = '3.9.1';
 function verNum(v) { return String(v).split('.').map(n => parseInt(n, 10) || 0).reduce((a, n) => a * 1000 + n, 0); }
 function playing() {
   if (anim.phase !== 'idle' && anim.phase !== 'rest') return true;
